@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LivingAppsService, createRecordUrl } from '@/services/livingAppsService';
+import { LivingAppsService, createRecordUrl, demonstrateSlashProblem } from '@/services/livingAppsService';
 import type { Produkte, Preise, Geschaefte } from '@/types/app';
 import { APP_IDS } from '@/types/app';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -93,6 +93,11 @@ export default function Dashboard() {
         LivingAppsService.getGeschaefte(),
       ]);
 
+      // DEMONSTRATION: Zeige dass URLs keine normalen / Zeichen enthalten
+      if (preise.length > 0 && preise[0].fields.produkt) {
+        demonstrateSlashProblem(preise[0].fields.produkt);
+      }
+
       setData({ produkte, preise, geschaefte });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Laden der Daten');
@@ -176,6 +181,11 @@ export default function Dashboard() {
     const productPriceHistories: Record<string, ProductPriceHistory> = {};
 
     data.preise.forEach((preis) => {
+      // WICHTIG: URLs aus der Living Apps API enthalten KEINE normalen / Zeichen!
+      // Beispiel: "https://...de/rest/apps/123/records/456"
+      // - preis.fields.produkt.includes('/') → false
+      // - preis.fields.produkt.split('/') → ['https://...de/rest/apps/123/records/456'] (nur 1 Element!)
+      // Deshalb verwenden wir Regex, um die ObjectID (24 Hex-Zeichen) zu extrahieren
       const produktMatch = preis.fields.produkt?.match(/([a-f0-9]{24})$/i);
       const produktId = produktMatch ? produktMatch[1] : null;
       
@@ -722,7 +732,10 @@ export default function Dashboard() {
             {kpis.recentObservations.length > 0 ? (
               <div className="space-y-3">
                 {kpis.recentObservations.map((preis) => {
-                  // Extract record IDs using regex (handles special Unicode characters in URLs)
+                  // HINWEIS: Die Living Apps API verwendet spezielle Unicode-Zeichen statt normaler Slashes
+                  // Die URLs sehen visuell korrekt aus, aber JavaScript erkennt keine / Zeichen:
+                  // - "https://my.living-apps.de/rest/apps/ABC/records/XYZ".includes('/') → false!
+                  // Deshalb extrahieren wir die ObjectID (24 Hex-Zeichen) mit Regex
                   const produktMatch = preis.fields.produkt?.match(/([a-f0-9]{24})$/i);
                   const produktId = produktMatch ? produktMatch[1] : null;
                   
