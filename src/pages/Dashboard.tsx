@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LivingAppsService, extractRecordId, createRecordUrl } from '@/services/livingAppsService';
+import { LivingAppsService, createRecordUrl } from '@/services/livingAppsService';
 import type { Produkte, Preise, Geschaefte } from '@/types/app';
 import { APP_IDS } from '@/types/app';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -176,8 +176,8 @@ export default function Dashboard() {
     const productPriceHistories: Record<string, ProductPriceHistory> = {};
 
     data.preise.forEach((preis) => {
-      const produktId = extractRecordId(preis.fields.produkt);
-      const geschaeftId = extractRecordId(preis.fields.geschaeft);
+      const produktId = preis.fields.produkt?.split('/').pop() || null;
+      const geschaeftId = preis.fields.geschaeft?.split('/').pop() || null;
 
       if (!produktId || preis.fields.preis === null || preis.fields.preis === undefined) return;
 
@@ -259,7 +259,7 @@ export default function Dashboard() {
     const shopPrices: Record<string, { name: string; totalPrice: number; count: number }> = {};
 
     data.preise.forEach((preis) => {
-      const geschaeftId = extractRecordId(preis.fields.geschaeft);
+      const geschaeftId = preis.fields.geschaeft?.split('/').pop() || null;
       if (!geschaeftId || preis.fields.preis === null || preis.fields.preis === undefined) return;
 
       const geschaeft = data.geschaefte.find(g => g.record_id === geschaeftId);
@@ -717,23 +717,26 @@ export default function Dashboard() {
             {kpis.recentObservations.length > 0 ? (
               <div className="space-y-3">
                 {kpis.recentObservations.map((preis) => {
-                  const produktId = extractRecordId(preis.fields.produkt);
-                  const geschaeftId = extractRecordId(preis.fields.geschaeft);
+                  // Extract record IDs directly here (avoiding cache issues)
+                  const produktId = preis.fields.produkt 
+                    ? preis.fields.produkt.split('/').pop() || null
+                    : null;
+                  const geschaeftId = preis.fields.geschaeft
+                    ? preis.fields.geschaeft.split('/').pop() || null
+                    : null;
 
                   const produkt = data?.produkte.find(p => p.record_id === produktId);
                   const geschaeft = data?.geschaefte.find(g => g.record_id === geschaeftId);
 
                   // Debug logging
-                  console.log('Preis Debug:', {
+                  console.log('Preis Debug (NEW):', {
                     preis_id: preis.record_id,
                     produkt_url: preis.fields.produkt,
                     geschaeft_url: preis.fields.geschaeft,
                     extracted_produkt_id: produktId,
                     extracted_geschaeft_id: geschaeftId,
                     found_produkt: produkt,
-                    found_geschaeft: geschaeft,
-                    available_produkte_ids: data?.produkte.map(p => p.record_id),
-                    available_geschaefte_ids: data?.geschaefte.map(g => g.record_id)
+                    found_geschaeft: geschaeft
                   });
 
                   const datum = preis.fields.datum
