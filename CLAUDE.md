@@ -422,35 +422,6 @@ Das Dashboard ist fertig wenn:
 - Success Feedback: Toast/Notification bei erfolgreichen Aktionen
 - Hover States: Visuelle Rückmeldung bei Interaktionen
 
-## ⚙️ WICHTIG: Vite Config Base Path setzen
-
-**KRITISCH für GitHub Pages Deployment!**
-
-Der Repo-Name ist in der Umgebungsvariable `REPO_NAME` gespeichert.
-
-**Vor dem Build musst du `vite.config.ts` anpassen:**
-
-1. Lies die Umgebungsvariable:
-```bash
-echo "REPO_NAME ist: $REPO_NAME"
-```
-
-2. Setze den base path in `vite.config.ts`:
-```typescript
-export default defineConfig({
-  base: '/<REPO_NAME>/',  // Ersetze <REPO_NAME> mit dem echten Wert aus $REPO_NAME!
-  plugins: [react()],
-  // ... rest of config
-})
-```
-
-**Beispiel:** Wenn `$REPO_NAME` = `fitness-tracker-a1b2c3`, dann:
-```typescript
-base: '/fitness-tracker-a1b2c3/',
-```
-
-**Warum?** GitHub Pages hostet unter `https://username.github.io/<repo-name>/` - ohne korrekten base path funktionieren die Assets nicht!
-
 ---
 
 ## 🚀 WICHTIG: Git Push am Ende

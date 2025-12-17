@@ -33,13 +33,28 @@ async def main():
         try:
             run_git_cmd("git config --global user.email 'lilo@livinglogic.de'")
             run_git_cmd("git config --global user.name 'Lilo'")
-
-            run_git_cmd("git init")
-            run_git_cmd("git checkout -b main")
-            run_git_cmd("git add .")
+            
+            git_push_url = os.getenv('GIT_PUSH_URL')
+            
+            # Prüfe ob Repo existiert und übernehme .git History
+            print("[DEPLOY] Prüfe ob Repo bereits existiert...")
+            try:
+                run_git_cmd(f"git clone {git_push_url} /tmp/old_repo")
+                run_git_cmd("cp -r /tmp/old_repo/.git /home/user/app/.git")
+                print("[DEPLOY] ✅ History vom existierenden Repo übernommen")
+            except:
+                # Neues Repo - von vorne initialisieren
+                print("[DEPLOY] ✅ Neues Repo wird initialisiert")
+                run_git_cmd("git init")
+                run_git_cmd("git checkout -b main")
+                run_git_cmd(f"git remote add origin {git_push_url}")
+            
+            # Neuen Code committen
+            run_git_cmd("git add -A")
             run_git_cmd("git commit -m 'Lilo Auto-Deploy' --allow-empty")
-            run_git_cmd(f"git remote add origin {os.getenv('GIT_PUSH_URL')}")
-            run_git_cmd("git push -u origin main")
+            run_git_cmd("git push origin main")
+            
+            print("[DEPLOY] ✅ Push erfolgreich!")
 
             return {
                 "content": [{"type": "text", "text": "✅ Deployment erfolgreich! Code wurde gepusht."}]
