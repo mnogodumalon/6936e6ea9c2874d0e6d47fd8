@@ -8,8 +8,18 @@ const API_BASE_URL = 'https://my.living-apps.de/rest';
 // --- HELPER FUNCTIONS ---
 export function extractRecordId(url: string | null | undefined): string | null {
   if (!url) return null;
+  
+  // Handle if url is already just an ID (no slashes)
+  if (!url.includes('/')) return url;
+  
+  // Extract the last part of the URL path
   const parts = url.split('/');
-  return parts[parts.length - 1];
+  const recordId = parts[parts.length - 1];
+  
+  // Debug logging
+  console.log('extractRecordId:', { input: url, output: recordId });
+  
+  return recordId || null;
 }
 
 export function createRecordUrl(appId: string, recordId: string): string {
