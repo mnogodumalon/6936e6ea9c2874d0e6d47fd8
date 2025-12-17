@@ -22,44 +22,49 @@ export function extractRecordId(url: string | null | undefined): string | null {
 }
 
 /**
- * Debug-Funktion: Zeigt, dass URLs aus der API keine normalen / Zeichen enthalten
+ * Debug-Funktion: Vergleicht split('/') vs. Regex-Extraktion
  */
 export function demonstrateSlashProblem(url: string): void {
-  console.group('🔍 URL-Analyse: Warum .split("/") nicht funktioniert');
-  console.log('📋 URL aus API:', url);
+  console.group('🔍 URL ID-Extraktion Vergleich');
+  console.log('📋 URL:', url);
   console.log('');
   
-  console.log('❌ Test 1: Enthält die URL normale / Zeichen?');
-  console.log('   url.includes("/"):', url.includes('/'));
-  console.log('   → Erwartet: true, Tatsächlich:', url.includes('/'), '❌');
+  // Methode 1: Original mit split('/')
+  console.log('Methode 1: url.split("/").pop()');
+  const splitParts = url.split('/');
+  const idFromSplit = splitParts.pop() || null;
+  console.log(`   Anzahl Teile nach split("/"): ${splitParts.length + 1}`);
+  console.log(`   Alle Teile:`, splitParts.concat([idFromSplit || '']));
+  console.log(`   ➜ Extrahierte ID: "${idFromSplit}"`);
+  console.log(`   ➜ ID-Länge: ${idFromSplit?.length || 0} Zeichen`);
   console.log('');
   
-  console.log('❌ Test 2: Was gibt .split("/") zurück?');
-  const splitResult = url.split('/');
-  console.log('   url.split("/").length:', splitResult.length);
-  console.log('   → Erwartet: 7-8 Teile, Tatsächlich:', splitResult.length, 'Teil(e) ❌');
-  console.log('   Array:', splitResult);
-  console.log('');
-  
-  console.log('❌ Test 3: Findet lastIndexOf das letzte / ?');
-  console.log('   url.lastIndexOf("/"):', url.lastIndexOf('/'));
-  console.log('   → Erwartet: >0, Tatsächlich:', url.lastIndexOf('/'), '(nicht gefunden) ❌');
-  console.log('');
-  
-  console.log('🔬 Test 4: Welche Zeichen sind das wirklich?');
-  const slashLikeChars = url.match(/[^\w\-.:]/g) || [];
-  if (slashLikeChars.length > 0) {
-    console.log('   Gefundene Nicht-Standard-Zeichen:');
-    slashLikeChars.slice(0, 3).forEach((char, i) => {
-      console.log(`   [${i}] Zeichen: "${char}" | Unicode: U+${char.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')} | Code: ${char.charCodeAt(0)}`);
-    });
-  }
-  console.log('');
-  
-  console.log('✅ Lösung: Regex extrahiert die ObjectID am Ende');
+  // Methode 2: Regex
+  console.log('Methode 2: url.match(/([a-f0-9]{24})$/i)');
   const match = url.match(/([a-f0-9]{24})$/i);
-  console.log('   url.match(/([a-f0-9]{24})$/i):', match ? match[1] : null);
-  console.log('   → Funktioniert! ✅');
+  const idFromRegex = match ? match[1] : null;
+  console.log(`   ➜ Extrahierte ID: "${idFromRegex}"`);
+  console.log(`   ➜ ID-Länge: ${idFromRegex?.length || 0} Zeichen`);
+  console.log('');
+  
+  // Vergleich
+  console.log('Vergleich:');
+  if (idFromSplit === idFromRegex && idFromSplit?.length === 24) {
+    console.log(`   ✅ Beide Methoden funktionieren und geben dasselbe Ergebnis: "${idFromSplit}"`);
+  } else if (idFromSplit !== idFromRegex) {
+    console.log(`   ❌ Unterschiedliche Ergebnisse!`);
+    console.log(`   split('/'): "${idFromSplit}"`);
+    console.log(`   regex:      "${idFromRegex}"`);
+    if (idFromRegex && idFromRegex.length === 24) {
+      console.log(`   → Regex-Methode ist korrekt ✅`);
+    }
+    if (splitParts.length === 0 || splitParts.length === 1) {
+      console.log(`   → split('/') funktioniert nicht - URL enthält keine normalen / Zeichen ❌`);
+    }
+  } else if (idFromSplit && idFromSplit.length !== 24) {
+    console.log(`   ⚠️ split('/') gibt falsche ID-Länge zurück: ${idFromSplit.length} statt 24 Zeichen`);
+  }
+  
   console.groupEnd();
 }
 
