@@ -717,6 +717,18 @@ export default function Dashboard() {
             {kpis.recentObservations.length > 0 ? (
               <div className="space-y-3">
                 {kpis.recentObservations.map((preis) => {
+                  // Detailed debug of extraction process
+                  console.log('=== EXTRACTION DEBUG ===');
+                  console.log('produkt field type:', typeof preis.fields.produkt);
+                  console.log('produkt field value:', preis.fields.produkt);
+                  
+                  const produktUrl = preis.fields.produkt;
+                  if (produktUrl) {
+                    const parts = produktUrl.split('/');
+                    console.log('Split parts:', parts);
+                    console.log('Last part (pop):', parts[parts.length - 1]);
+                  }
+                  
                   // Extract record IDs directly here (avoiding cache issues)
                   const produktId = preis.fields.produkt 
                     ? preis.fields.produkt.split('/').pop() || null
@@ -724,6 +736,9 @@ export default function Dashboard() {
                   const geschaeftId = preis.fields.geschaeft
                     ? preis.fields.geschaeft.split('/').pop() || null
                     : null;
+
+                  console.log('Final produktId:', produktId);
+                  console.log('Final geschaeftId:', geschaeftId);
 
                   const produkt = data?.produkte.find(p => p.record_id === produktId);
                   const geschaeft = data?.geschaefte.find(g => g.record_id === geschaeftId);
