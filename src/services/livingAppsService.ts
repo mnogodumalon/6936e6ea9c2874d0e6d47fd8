@@ -9,17 +9,10 @@ const API_BASE_URL = 'https://my.living-apps.de/rest';
 export function extractRecordId(url: string | null | undefined): string | null {
   if (!url) return null;
   
-  // Handle if url is already just an ID (no slashes)
-  if (!url.includes('/')) return url;
-  
-  // Extract the last part of the URL path
-  const parts = url.split('/');
-  const recordId = parts[parts.length - 1];
-  
-  // Debug logging
-  console.log('extractRecordId:', { input: url, output: recordId });
-  
-  return recordId || null;
+  // Use regex to extract MongoDB ObjectID (24 hex characters) from the end of the URL
+  // This handles URLs with special Unicode characters that look like slashes
+  const match = url.match(/([a-f0-9]{24})$/i);
+  return match ? match[1] : null;
 }
 
 export function createRecordUrl(appId: string, recordId: string): string {

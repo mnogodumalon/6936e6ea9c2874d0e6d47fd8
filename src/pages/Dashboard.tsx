@@ -176,12 +176,11 @@ export default function Dashboard() {
     const productPriceHistories: Record<string, ProductPriceHistory> = {};
 
     data.preise.forEach((preis) => {
-      const produktId = preis.fields.produkt 
-        ? preis.fields.produkt.substring(preis.fields.produkt.lastIndexOf('/') + 1) || null
-        : null;
-      const geschaeftId = preis.fields.geschaeft
-        ? preis.fields.geschaeft.substring(preis.fields.geschaeft.lastIndexOf('/') + 1) || null
-        : null;
+      const produktMatch = preis.fields.produkt?.match(/([a-f0-9]{24})$/i);
+      const produktId = produktMatch ? produktMatch[1] : null;
+      
+      const geschaeftMatch = preis.fields.geschaeft?.match(/([a-f0-9]{24})$/i);
+      const geschaeftId = geschaeftMatch ? geschaeftMatch[1] : null;
 
       if (!produktId || preis.fields.preis === null || preis.fields.preis === undefined) return;
 
@@ -263,9 +262,9 @@ export default function Dashboard() {
     const shopPrices: Record<string, { name: string; totalPrice: number; count: number }> = {};
 
     data.preise.forEach((preis) => {
-      const geschaeftId = preis.fields.geschaeft
-        ? preis.fields.geschaeft.substring(preis.fields.geschaeft.lastIndexOf('/') + 1) || null
-        : null;
+      const geschaeftMatch = preis.fields.geschaeft?.match(/([a-f0-9]{24})$/i);
+      const geschaeftId = geschaeftMatch ? geschaeftMatch[1] : null;
+      
       if (!geschaeftId || preis.fields.preis === null || preis.fields.preis === undefined) return;
 
       const geschaeft = data.geschaefte.find(g => g.record_id === geschaeftId);
@@ -723,36 +722,15 @@ export default function Dashboard() {
             {kpis.recentObservations.length > 0 ? (
               <div className="space-y-3">
                 {kpis.recentObservations.map((preis) => {
-                  // DEBUG: Check character codes
-                  const produktUrl = preis.fields.produkt;
-                  if (produktUrl) {
-                    console.log('URL:', produktUrl);
-                    console.log('URL length:', produktUrl.length);
-                    console.log('lastIndexOf /:', produktUrl.lastIndexOf('/'));
-                    console.log('First 50 chars:', produktUrl.substring(0, 50));
-                    console.log('Last 30 chars:', produktUrl.substring(produktUrl.length - 30));
-                    // Check if it contains regular slash
-                    console.log('Contains regular /:', produktUrl.includes('/'));
-                    // Try regex extraction
-                    const match = produktUrl.match(/([a-f0-9]{24})$/i);
-                    console.log('Regex match:', match);
-                  }
-                  
-                  // Extract record IDs using regex (most robust for MongoDB ObjectIDs)
+                  // Extract record IDs using regex (handles special Unicode characters in URLs)
                   const produktMatch = preis.fields.produkt?.match(/([a-f0-9]{24})$/i);
                   const produktId = produktMatch ? produktMatch[1] : null;
                   
                   const geschaeftMatch = preis.fields.geschaeft?.match(/([a-f0-9]{24})$/i);
                   const geschaeftId = geschaeftMatch ? geschaeftMatch[1] : null;
 
-                  console.log('Extracted produktId:', produktId);
-                  console.log('Extracted geschaeftId:', geschaeftId);
-
                   const produkt = data?.produkte.find(p => p.record_id === produktId);
                   const geschaeft = data?.geschaefte.find(g => g.record_id === geschaeftId);
-                  
-                  console.log('Found produkt:', produkt);
-                  console.log('Found geschaeft:', geschaeft);
 
                   const datum = preis.fields.datum
                     ? format(parseISO(preis.fields.datum), 'PPP', { locale: de })
