@@ -30,9 +30,10 @@ export function demonstrateSlashProblem(url: string): void {
   console.log('');
   
   // Methode 1: Original mit split('/')
-  console.log('Methode 1: url.split("/").pop()');
+  console.log('🚨 TEST 2024-12-17 12:45 🚨 Methode 1: url.split("/").pop()');
   const splitParts = url.split('/');
   const idFromSplit = splitParts.pop() || null;
+  console.log('🚨 SPLIT RESULT:', splitParts);
   console.log(`   Anzahl Teile nach split("/"): ${splitParts.length + 1}`);
   console.log(`   Alle Teile:`, splitParts.concat([idFromSplit || '']));
   console.log(`   ➜ Extrahierte ID: "${idFromSplit}"`);
