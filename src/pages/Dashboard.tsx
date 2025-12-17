@@ -723,6 +723,19 @@ export default function Dashboard() {
                   const produkt = data?.produkte.find(p => p.record_id === produktId);
                   const geschaeft = data?.geschaefte.find(g => g.record_id === geschaeftId);
 
+                  // Debug logging
+                  console.log('Preis Debug:', {
+                    preis_id: preis.record_id,
+                    produkt_url: preis.fields.produkt,
+                    geschaeft_url: preis.fields.geschaeft,
+                    extracted_produkt_id: produktId,
+                    extracted_geschaeft_id: geschaeftId,
+                    found_produkt: produkt,
+                    found_geschaeft: geschaeft,
+                    available_produkte_ids: data?.produkte.map(p => p.record_id),
+                    available_geschaefte_ids: data?.geschaefte.map(g => g.record_id)
+                  });
+
                   const datum = preis.fields.datum
                     ? format(parseISO(preis.fields.datum), 'PPP', { locale: de })
                     : 'Unbekannt';
